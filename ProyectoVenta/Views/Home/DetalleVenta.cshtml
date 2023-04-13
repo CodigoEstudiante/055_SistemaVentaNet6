@@ -1,0 +1,218 @@
+﻿
+@{
+    ViewData["Title"] = "DetalleVenta";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles{
+    <style>
+        .input-group-text{
+            background-color: #343a40;
+        }
+        #tabla{
+            border-collapse:collapse;
+            border:1px solid #9D9D9D;
+        }
+
+        #tabla > thead > tr{
+            background-color:#20374c !important;
+        }
+    </style>
+}
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="#">Ventas</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Ver Detalle</li>
+  </ol>
+</nav>
+
+<div class="row">
+    <div class="col-sm-8 mb-2">
+
+        <div class="card mb-2">
+            <div class="card-body">
+               <div class="row align-items-end">
+                    <div class="col-sm-4">
+
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="row align-items-end text-end">
+                            <label for="txtNumeroDocumento" class="col-sm-6 col-form-label">Numero Documento:</label>
+                            <div class="col-sm-6">
+                              <input type="text" class="form-control form-control-sm" id="txtNumeroDocumento" autocomplete="off"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div  class="d-grid">
+                            <button class="btn btn-success btn-sm" id="btnbuscar"><i class="bi bi-search"></i> Buscar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                Productos
+            </div>
+            <div class="card-body">
+                
+                <div class="row">
+                    <div class="col-sm-12">
+                        <table id="tabla" class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th style="width: 80px;">Cantidad</th>
+                                    <th>Precio</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    
+                </div>
+            </div>
+        </div>
+
+        
+    </div>
+
+    <div class="col-sm-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                Detalle Venta
+                            </div>
+                            <div class="col-sm-6 text-end">
+                                <p id="pFechaVenta" class="text-warning fw-bold m-0 p-0"></p>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="card-body">
+
+                        <div class="input-group input-group-sm mb-2">
+                          <span class="input-group-text bg-dark">Tipo de Pago:</span>
+                          <input type="text" class="form-control form-control-sm text-end fw-bold" id="txtTipoPago" disabled/>
+                        </div>
+                        <hr />
+                        <div class="input-group input-group-sm mb-2">
+                          <span class="input-group-text bg-dark">Pago con</span>
+                          <input type="text" class="form-control form-control-sm text-end fw-bold" id="txtPagoCon" disabled>
+                        </div>
+                        <div class="input-group input-group-sm mb-2">
+                          <span class="input-group-text bg-dark">Cambio</span>
+                          <input type="text" class="form-control form-control-sm text-end fw-bold" id="txtCambio" disabled >
+                        </div>
+
+                        <div class="input-group input-group-sm mb-2">
+                          <span class="input-group-text bg-primary">Sub Total</span>
+                          <input type="text" class="form-control form-control-sm text-end fw-bold" id="txtSubTotal" disabled>
+                        </div>
+                        <div class="input-group input-group-sm mb-2">
+                          <span class="input-group-text bg-primary">IGV (18%)</span>
+                          <input type="text" class="form-control form-control-sm text-end fw-bold" id="txtIgv" disabled>
+                        </div>
+                        <div class="input-group input-group-sm mb-2">
+                          <span class="input-group-text bg-primary">Total</span>
+                          <input type="text" class="form-control form-control-sm text-end fw-bold" id="txtTotal" disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        Cliente
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group input-group-sm mb-2">
+                          <span class="input-group-text bg-dark">Nro. Documento</span>
+                          <input type="text" class="form-control form-control-sm" id="txtdocumentocliente" disabled>
+                        </div>
+                        <div class="input-group input-group-sm mb-2">
+                          <span class="input-group-text bg-dark">Nombres</span>
+                          <input type="text" class="form-control form-control-sm" id="txtnombrecliente" disabled >
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+
+        $("#btnbuscar").on("click", function () {
+
+            jQuery.ajax({
+                url: '@Url.Action("ObtenerVenta", "Home")?nrodocumento=' + $("#txtNumeroDocumento").val(),
+                type: "GET",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+
+                    $("#tabla tbody").html("");
+                        if(data.tipoPago !== null){
+                            $.each(data.oDetalleVenta,function(x,item){
+                                $("<tr>").append(
+                                    $("<td>").text(item.oProducto.descripcion),
+                                    $("<td>").text(item.cantidad),
+                                    $("<td>").text(item.precioVenta.toFixed(2)),
+                                    $("<td>").text(item.total.toFixed(2))
+                                ).appendTo("#tabla tbody")
+                            })
+
+                            $("#pFechaVenta").text(data.fechaRegistro);
+                            $("#txtTipoPago").val(data.tipoPago);
+                            $("#txtPagoCon").val(data.montoPagoCon.toFixed(2));
+                            $("#txtCambio").val(data.montoCambio.toFixed(2));
+                            $("#txtSubTotal").val(data.montoSubTotal.toFixed(2));
+                            $("#txtIgv").val(data.montoIGV.toFixed(2));
+                            $("#txtTotal").val(data.montoTotal.toFixed(2));
+
+                            $("#txtdocumentocliente").val(data.documentoCliente);
+                            $("#txtnombrecliente").val(data.nombreCliente);
+                    
+                        }else{
+                            Swal.fire({
+                              icon: 'error',
+                              title: 'No se encontraron resultados',
+                            })
+
+                            $("#pFechaVenta").text("");
+                            $("#txtTipoPago").val("");
+                            $("#txtPagoCon").val("");
+                            $("#txtCambio").val("");
+                            $("#txtSubTotal").val("");
+                            $("#txtIgv").val("");
+                            $("#txtTotal").val("");
+
+                            $("#txtdocumentocliente").val("");
+                            $("#txtnombrecliente").val("");
+                        }
+                    
+
+                },
+                error: function (error) {
+                    console.log(error)
+                }
+        });
+        })
+        
+    </script>
+}

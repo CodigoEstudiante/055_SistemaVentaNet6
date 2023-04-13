@@ -1,0 +1,445 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@section Styles{
+    <style>
+        .input-group-text{
+            background-color: #343a40;
+        }
+        #tabla{
+            border-collapse:collapse;
+            border:1px solid #9D9D9D;
+        }
+
+        #tabla > thead > tr{
+            background-color:#20374c !important;
+        }
+    </style>
+}
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="#">Ventas</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Crear Nuevo</li>
+  </ol>
+</nav>
+
+<div class="row">
+    <div class="col-sm-8 mb-2">
+
+        <div class="card mb-2">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-12 text-end">
+                        <button class="btn btn-primary me-2" id="btnTerminarVenta"><i class="bi bi-currency-dollar"></i> Terminar Venta</button>
+                        <button class="btn btn-danger" id="btnLimpiarLista"><i class="bi bi-x-circle-fill"></i> Limpiar Lista</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                Productos
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <label for="exampleFormControlInput1" class="form-label">Buscar Producto</label>
+                        <input type="text" class="form-control form-control-sm" id="buscarProducto" data-idproducto="0"/>     
+                    </div>
+                </div>
+                <hr />
+                <div class="row">
+                    <div class="col-sm-12">
+                        <table id="tabla" class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th style="width: 80px;">Cantidad</th>
+                                    <th>Precio</th>
+                                    <th>Total</th>
+                                    <th style="width: 50px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+
+                    
+                </div>
+            </div>
+        </div>
+
+        
+    </div>
+
+    <div class="col-sm-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                Detalle Venta
+                            </div>
+                            <div class="col-sm-6 text-end">
+                                <p id="pVentaTotal" class="text-warning fw-bold m-0 p-0"></p>
+                                
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="card-body">
+
+                       @* <div class="input-group input-group-sm mb-2">
+                          <span class="input-group-text bg-dark">Nro Venta</span>
+                          <input type="text" class="form-control form-control-sm" disabled>
+                        </div>
+*@
+                        <div class="input-group input-group-sm mb-2">
+                          <span class="input-group-text bg-dark">Tipo de Pago:</span>
+                          <select class="form-select form-select-sm" id="cbotipopago" style="cursor:pointer">
+                              <option value="Efectivo" selected>Efectivo</option>
+                              <option value="Tarjeta">Tarjeta</option>
+                              <option value="Movil">Movil</option>
+                          </select>
+                        </div>
+                        <hr />
+                        <div class="input-group input-group-sm mb-2">
+                          <span class="input-group-text bg-dark">Pago con</span>
+                          <input type="text" class="form-control form-control-sm" id="txtPagoCon">
+                        </div>
+                        <div class="input-group input-group-sm mb-2">
+                          <span class="input-group-text bg-dark">Cambio</span>
+                          <input type="text" class="form-control form-control-sm text-end fw-bold" id="txtCambio" disabled >
+                        </div>
+
+                        <div class="input-group input-group-sm mb-2">
+                          <span class="input-group-text bg-primary">Sub Total</span>
+                          <input type="text" id="txtSubTotal" class="form-control form-control-sm text-end fw-bold" disabled>
+                        </div>
+                        <div class="input-group input-group-sm mb-2">
+                          <span class="input-group-text bg-primary">IGV (18%)</span>
+                          <input type="text" id="txtIgv" class="form-control form-control-sm text-end fw-bold" disabled>
+                        </div>
+                        <div class="input-group input-group-sm mb-2">
+                          <span class="input-group-text bg-primary">Total</span>
+                          <input type="text" id="txtTotal" class="form-control form-control-sm text-end fw-bold" disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        Cliente
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group input-group-sm mb-2">
+                          <span class="input-group-text bg-dark">Nro. Documento</span>
+                          <input type="text" class="form-control form-control-sm" id="txtdocumentocliente">
+                        </div>
+                        <div class="input-group input-group-sm mb-2">
+                          <span class="input-group-text bg-dark">Nombres</span>
+                          <input type="text" class="form-control form-control-sm" id="txtnombrecliente">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+
+    var productos = [];
+    $(document).ready(function(){
+
+        MostrarPrecios();
+        mostrarListaVacia();
+       
+    })
+
+    function mostrarListaVacia(){
+        if(productos.length === 0){
+            $("#tabla tbody").html("<tr><td colspan='5'><p class='text-warning text-center'>Ningún producto seleccionado</p></td></tr>");
+        }
+    }
+
+     $("#buscarProducto").autocomplete({
+         source: function(request,response){
+         		
+                 jQuery.ajax({
+                     url: "@Url.Action("AutoCompleteProducto","Home")?search=" + request.term,
+                     type:"GET",
+                     dataType:"json",
+                     success:function(data){
+                         response(
+                             $.map(data, function (item) {
+                                 return {  label: item.label, value: item.value}
+                             })
+                         )
+                     },
+                     error: function (error) {
+                 	    console.log("bad")
+                     }
+                 })
+         },
+         minLength : 1,
+         select: function(event,ui){
+             event.preventDefault();
+
+             //$(this).val(ui.item.label);
+             //$(this).data("idproducto",ui.item.value);
+             AgregarProducto(ui.item.value)
+             $(this).val("");
+         },
+         focus: function(event, ui) {
+             event.preventDefault();
+             $(this).val(ui.item.label);
+         }
+     })
+
+
+      function AgregarProducto(idproducto){
+
+            $.ajax({
+                url: "@Url.Action("ObtenerProducto","Home")?idproducto=" + idproducto,
+                type:"GET",
+                dataType:"json",
+                contentType: "application/json; charset=utf-8",
+                success:function(data){
+
+                        const existe = productos.some(element => element.IdProducto === data.idProducto);
+
+                        if(existe){
+                            Object.keys(productos).forEach(index => {
+                               
+                                if(productos[index].IdProducto === data.idProducto){
+                                    productos[index] = {
+                                        IdProducto : data.idProducto,
+                                        Descripcion :data.descripcion,
+                                        PrecioVenta : data.precioVenta,
+                                        Cantidad: productos[index].Cantidad + 1,
+                                        Total: data.precioVenta * (productos[index].Cantidad + 1)
+                                    }
+                                }
+                            });
+                        
+                        }else{
+                            var producto = {
+                                IdProducto : data.idProducto,
+                                Descripcion : data.descripcion,
+                                PrecioVenta : data.precioVenta,
+                                Cantidad: 1,
+                                Total: data.precioVenta
+                            }
+
+                            productos.push(producto);
+                        }
+
+                        $("#tabla tbody").html("");
+
+                        $.each(productos, function(i,item){
+                        
+                            $("<tr>").append(
+                                $("<td>").append(item.Descripcion),
+                                $("<td>").append(item.Cantidad),
+                                $("<td>").append(item.PrecioVenta.toFixed(2)),
+                                $("<td>").append(item.Total.toFixed(2)),
+                                $("<td>").append(
+                                    $("<button>").addClass("btn btn-danger btn-eliminar btn-sm").append(
+                                        $("<i>").addClass("bi bi-trash-fill")
+                                    )
+                                ),
+                            ).data("idproducto",item.IdProducto).appendTo("#tabla tbody")
+                        })
+
+
+                        MostrarPrecios();
+                },
+                error: function (error) {
+            	    console.log("bad")
+                }
+            })
+    
+        }
+
+
+        $("#tabla tbody").on("click",".btn-eliminar",function(){
+
+            var idproducto = $(this).closest('tr').data("idproducto");
+
+            const newArray = productos.filter(object => {
+              return object.IdProducto !== idproducto;
+            });
+
+            productos = newArray;
+            $(this).closest('tr').remove();
+
+            MostrarPrecios();
+
+            $("#txtPagoCon").val("");
+            $("#txtCambio").val("");
+
+        })
+
+        $("#cbotipopago").on("change",function(){
+        
+            if($(this).val() !=="Efectivo"){
+                $("#txtPagoCon").attr({"disabled":true});
+                MostrarPrecios(true)
+            }else{
+                $("#txtPagoCon").removeAttr("disabled");
+                $("#txtPagoCon").val("")
+                $("#txtCambio").val("")
+            }
+            
+        })
+
+        $("#btnLimpiarLista").on("click",function(){
+            $("#tabla tbody").html("");
+            productos = [];
+            mostrarListaVacia();
+            MostrarPrecios();
+            $("#txtPagoCon").val("");
+            $("#txtCambio").val("");
+        })
+
+        function calcularCambio() {
+
+            let total = productos.reduce(function (accumulator, item) {
+              return accumulator + item.Total
+            }, 0)
+
+            var montopago = $("#txtPagoCon").val().trim() == "" ? total : parseFloat($("#txtPagoCon").val().trim());
+
+
+            var cambio = 0;
+            cambio = (montopago <= total ? total : montopago) - total;
+
+            if($("#txtPagoCon").val().trim() == ""){
+                $("#txtPagoCon").val(total.toFixed(2));
+            }
+                
+
+            $("#txtCambio").val("S/. " + cambio.toFixed(2));
+        }
+        
+
+        $("#txtPagoCon").on("keyup",function(event){
+            if(event.keyCode === 13){
+                calcularCambio();
+            }
+        })
+
+        function MostrarPrecios(tipoPago = false){
+        
+            let total = productos.reduce(function (accumulator, item) {
+              return accumulator + item.Total
+            }, 0)
+
+            let base = total / 1.18;
+            let igv = total - base;
+
+             $("#pVentaTotal").html("S/. " + total.toFixed(2))
+             $("#txtSubTotal").val("S/. " + base.toFixed(2))
+             $("#txtIgv").val("S/. " + igv.toFixed(2))
+             $("#txtTotal").val("S/. " + total.toFixed(2))
+
+            if(tipoPago){
+               $("#txtPagoCon").val("S/. " + total.toFixed(2))
+               $("#txtCambio").val("S/. 0.00")
+            }
+        }
+
+        $("#btnTerminarVenta").on("click",function(){
+
+            if(productos.length == 0){
+                Swal.fire({
+                  icon: 'error',
+                  title: 'No existen productos',
+                })
+
+                return;
+            }
+
+            calcularCambio();
+
+
+            var request_body = {
+                TipoPago : $("#cbotipopago option:selected").val(),
+                DocumentoCliente : $("#txtdocumentocliente").val(),
+                NombreCliente : $("#txtnombrecliente").val(),
+                MontoPagoCon : parseFloat($("#txtPagoCon").val()),
+                MontoCambio : parseFloat($("#txtCambio").val().replace("S/. ","","gi")),
+                MontoSubTotal : parseFloat($("#txtSubTotal").val().replace("S/. ","","gi")),
+                MontoIGV : parseFloat($("#txtIgv").val().replace("S/. ","","gi")),
+                MontoTotal : parseFloat($("#txtTotal").val().replace("S/. ","","gi")),
+                oDetalleVenta : $.map(productos,function(item){
+                        return {
+                            oProducto: {IdProducto : item.IdProducto},
+                            PrecioVenta : item.PrecioVenta,
+                            Cantidad : item.Cantidad,
+                            Total : item.Total
+                        }
+                    })
+            }
+
+
+             jQuery.ajax({
+                 url: '@Url.Action("RegistrarVenta", "Home")',
+                 type: "POST",
+                 data: JSON.stringify(request_body),
+                 dataType: "json",
+                 contentType: "application/json; charset=utf-8",
+                 success: function (data) {
+                     console.log(data)
+                     
+                     if(data.respuesta !== ""){
+
+                        Swal.fire({
+                          icon: 'success',
+                          title: 'Venta Registrada',
+                          text: 'Nro Documento: ' + data.respuesta
+                        })
+
+                        $("#tabla tbody").html("");
+                        productos = [];
+                        mostrarListaVacia();
+                        MostrarPrecios();
+                        $("#txtPagoCon").val("");
+                        $("#txtCambio").val("");
+                        $("#txtdocumentocliente").val("");
+                        $("#txtnombrecliente").val("");
+                     }else{
+                        Swal.fire({
+                          icon: 'error',
+                          title: 'No se puedo completar la venta',
+                        })
+                     }
+                 },
+                 error: function (error) {
+                 },
+                 beforeSend: function () {
+                 }
+             });
+
+
+
+        })
+    </script>
+
+    
+
+}
+

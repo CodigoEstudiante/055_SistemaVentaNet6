@@ -1,0 +1,383 @@
+﻿
+@{
+    ViewData["Title"] = "Categorias";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@section Styles{
+ <!-- ============================================================
+    =ESTILOS PARA USO DE DATATABLES JS
+    ===============================================================-->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.0/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.0/css/buttons.dataTables.min.css">
+
+    <!-- ============================================================
+    =HEADER
+    ===============================================================-->
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.2.2/css/fixedHeader.dataTables.min.css">
+
+    <style>
+        .dataTables_filter {
+            color: #fff !important;
+        }
+        input[type="search"]{
+            color: #fff !important;
+        }
+
+        .dataTables_length{
+            color: #fff !important;
+        }
+
+        .dataTables_info{
+            color: #fff !important;
+        }
+
+        table.dataTable tbody tr{
+            background-color: #4e5d6c !important;
+        }
+
+        table.dataTable thead th{
+            padding: 0.5rem 0.5rem !important;
+        }
+
+
+        .btn-nuevo{
+            background-color: #5cb85c !important;
+            color: #fff !important;
+        }
+
+        .buttons-excel{
+            background-color: #5bc0de !important;
+            color: #fff !important;
+        }
+
+        .buttons-page-length{
+            background-color: #e9ecef !important;
+            color: #000 !important;
+        }
+        
+        .paginate_button{
+            background-color: #e9ecef !important;
+            color: #000 !important;
+        }
+        
+        
+        #tbdata > thead input {
+            width: 100%;
+        }
+
+    </style>
+}
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="#">Inventario</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Categoria</li>
+  </ol>
+</nav>
+
+
+<div class="card">
+    <div class="card-header">
+        Lista de categorias
+    </div>
+    <div class="card-body">
+
+        <div class="row">
+            <div class="col-sm-12">
+                <table id="tbdata" class="table table-striped w-100 shadow" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>IdCategoria</th>
+                            <th>Descripcion</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        
+        
+    </div>
+
+</div>
+
+<div id="modalCategoria" class="modal" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detalle Categoria</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+          <form class="needs-validation" novalidate>
+            <input id="txtidcategoria" value="0" type="hidden" />
+            
+            <div class="row mt-2">
+                <div class="col-12">
+                    <label class="form-label">Descripción</label>
+                    <input type="text" class="form-control form-control-sm" id="txtdescripcion" required/>
+                    <div class="invalid-feedback">Ingrese la descripcion</div>
+                </div>
+            </div>
+          </form>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+        <button id="btnguardarcategoria" type="button" class="btn btn-primary">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts
+{
+
+     <!-- ============================================================
+    =LIBRERIAS PARA USO DE DATATABLES JS
+    ===============================================================-->
+    <script src="https://cdn.datatables.net/1.11.0/js/jquery.dataTables.min.js"></script>        
+    <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+
+     <!-- ============================================================
+    =HEADER
+    ===============================================================-->
+    <script src="https://cdn.datatables.net/fixedheader/3.2.2/js/dataTables.fixedHeader.min.js"></script>
+
+
+     <!-- ============================================================
+    =LIBRERIAS PARA EXPORTAR A ARCHIVOS
+    ===============================================================-->
+    <script src="https://cdn.datatables.net/buttons/2.0.0/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.print.min.js"></script>
+
+   
+
+
+    <script>
+        var operacion = "";
+        var tabla;
+
+        $(document).ready(function(){
+
+            $('#tbdata thead tr').clone(true).addClass('filters').appendTo('#tbdata thead')
+
+            tabla = $("#tbdata").DataTable({
+                orderCellsTop: true,
+                fixedHeader: true,
+                dom:"Bfrtip",
+                buttons:[
+                    {
+                        text:"Crear Nuevo",
+                        className:"btn-nuevo",
+                        action:function(e,dt,node,config){
+
+                            operacion = "crear";
+                            limpiarControles();
+                            $(".needs-validation").removeClass("was-validated")
+                            $("#txtidcategoria").val("0");
+                            $("#modalCategoria").modal("show");
+
+                        }
+                    },
+                    {
+                        text: 'Exportar Excel',
+                        extend: 'excelHtml5',
+                        title: '',
+                        filename: 'Reporte Categorias',
+                        exportOptions: {
+                            columns: [ 1 ]
+                        }
+                    },'pageLength'
+                ],
+                pageLength: 10,
+                responsive: true,
+                "ajax": {
+                    "url": '@Url.Action("ListaCategoria", "Inventario")',
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "idCategoria" },
+                    { "data": "descripcion" },
+                    {
+                        "defaultContent": '<button class="btn btn-primary btn-editar btn-sm me-2"><i class="bi bi-pencil-fill"></i></button>' +
+                            '<button class="btn btn-danger btn-eliminar btn-sm"><i class="bi bi-trash-fill"></i></button>',
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "80px"
+                    }
+                ],
+                initComplete: function () {
+                        var api = this.api();
+ 
+                        // For each column
+                        api.columns().eq(0).each(function (colIdx) {
+                                // Set the header cell to contain the input element
+                                var cell = $('.filters th').eq(
+                                    $(api.column(colIdx).header()).index()
+                                );
+                                var title = $(cell).text();
+
+                                //especificar que columna debe mostrar la caja de filtro
+                                if ($(api.column(colIdx).header()).index() >= 0 &&  $(api.column(colIdx).header()).index() != 1) {
+                                     $(cell).html('<input type="text" placeholder="buscar..."/>');
+                                }
+ 
+                                // On every keypress in this input
+                                $('input', $('.filters th').eq($(api.column(colIdx).header()).index())).off('keyup change').on('keyup change', function (e) {
+
+                                        e.stopPropagation();
+ 
+                                        // Get the search value
+                                        $(this).attr('title', $(this).val());
+                                        var regexr = '({search})'; //$(this).parents('th').find('select').val();
+ 
+                                        var cursorPosition = this.selectionStart;
+                                        // Search the column for that value
+                                        api.column(colIdx).search(
+                                                this.value != '' ? regexr.replace('{search}', '(((' + this.value + ')))') : '',
+                                                this.value != '',
+                                                this.value == ''
+                                            ).draw();
+ 
+                                        $(this).focus()[0].setSelectionRange(cursorPosition, cursorPosition);
+                                    });
+                            });
+                },
+                columnDefs:[
+                    {
+                        targets: 0,
+                        visible:false
+                    }
+                ],
+                language:{
+                    url:"//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json"
+                },
+            })
+        
+        })
+
+
+        
+        $("#btnguardarcategoria").on("click",function(){
+
+            //BUSCAR EN GOOGLE 2Validation · Bootstrap v5.0""
+
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.querySelectorAll('.needs-validation')
+            
+            // Loop over them and prevent submission
+            Array.prototype.slice.call(forms).forEach(function (form) {
+            
+                  if (form.checkValidity()) {
+                      console.log("Listo para registrar");
+                      var request_body = {
+                          IdCategoria : $("#txtidcategoria").val(),
+                          Descripcion : $("#txtdescripcion").val()
+                      };
+                      
+                      
+                      jQuery.ajax({
+                          url: '@Url.Action("GuardarCategoria", "Inventario")',
+                          type: "POST",
+                          headers: {
+                              operacion: operacion
+                          },
+                          data: JSON.stringify(request_body),
+                          dataType: "json",
+                          contentType: "application/json; charset=utf-8",
+                          success: function (data) {
+                              console.log(data)
+                      
+                              if(data.respuesta){
+                                  tabla.ajax.reload();
+                                  $("#modalCategoria").modal("hide");
+                              }
+                          },
+                          error: function (error) {
+                          },
+                          beforeSend: function () {
+                          }
+                      });
+
+                  }else{
+                      console.log("no paso validacion")
+                  }
+            
+                  form.classList.add('was-validated')
+            })
+
+        })
+
+
+        $("#tbdata tbody").on("click",".btn-editar",function(){
+            operacion = "editar";
+            $(".needs-validation").removeClass("was-validated")
+            $("#modalCategoria").modal("show");
+
+            var filaSeleccionada = $(this).closest('tr');
+            var data = tabla.row(filaSeleccionada).data();
+
+            $("#txtidcategoria").val(data.idCategoria)
+            $("#txtdescripcion").val(data.descripcion)
+
+            console.log(data);
+        })
+
+        $("#tbdata tbody").on("click",".btn-eliminar",function(){
+
+            var filaSeleccionada = $(this).closest('tr');
+            var data = tabla.row(filaSeleccionada).data();
+
+            $("#txtidcategoria").val(data.idCategoria)
+
+            Swal.fire({
+              title: '¿Esta seguro de eliminar?',
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: '#3085d6',
+              cancelButtonColor: '#d33',
+              confirmButtonText: 'Si, eliminarlo',
+              cancelButtonText: 'Cancelar'
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+                      jQuery.ajax({
+                          url: '@Url.Action("EliminarCategoria", "Inventario")?idcategoria='+data.idCategoria,
+                          type: "DELETE",
+                          dataType: "json",
+                          contentType: "application/json; charset=utf-8",
+                          success: function (data) {
+                              console.log(data)
+                              if(data.respuesta){
+                                  tabla.ajax.reload();
+                              }
+                          },
+                          error: function (error) {
+                          },
+                          beforeSend: function () {
+                          }
+                      });
+                }
+
+            })
+
+
+            console.log(data);
+        })
+
+
+        function limpiarControles(){
+            $("#txtdescripcion").val("");
+        }
+    </script>
+}
